@@ -1,0 +1,17 @@
+<div class="container mt-5">
+  <div class="card shadow mb-4">
+    <div class="card-body text-center">
+      <h1 class="text-primary font-weight-bold">
+        <i class="bi bi-box-seam"></i> Neighborhood Inventory
+      </h1>
+      <p class="text-muted">Community management system.</p>
+    </div>
+  </div>
+
+  <app-formularioprod (productoCreado)="onProductoAgregado($event)"></app-formularioprod>
+
+  <hr class="my-4">
+
+  <app-tabla-inventario [misProductos]="listaGlobal" (productoEliminado)="onEliminarProducto($event)"></app-tabla-inventario>
+    
+</div>
