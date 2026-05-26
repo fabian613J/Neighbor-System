@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -6,16 +7,18 @@ import { Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:8000'; // URL de tu FastAPI
+  private apiUrl = 'http://127.0.0.1:8000';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  // Enviamos las credenciales al endpoint /login que creamos en Python
   login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { username, password }).pipe(
+    const credentials = { username, password };
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => {
-        // Si el login es exitoso, guardamos el token y el nombre en el navegador
-        if (res.access_token) {
+        if (res.access_token && isPlatformBrowser(this.platformId)) {
           localStorage.setItem('token', res.access_token);
           localStorage.setItem('username', res.user);
         }
@@ -23,13 +26,14 @@ export class AuthService {
     );
   }
 
-  // Método para verificar si el vecino está autenticado
   isLoggedIn(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
     return !!localStorage.getItem('token');
   }
 
-  // Limpiar la sesión
-  logout() {
-    localStorage.clear();
+  logout(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.clear();
+    }
   }
 }

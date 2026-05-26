@@ -1,0 +1,106 @@
+<div class="p-4">
+  <h4 class="mb-4"><i class="bi bi-arrow-left-right me-2"></i>Loan Management</h4>
+
+  @if (loadError) {
+    <div class="alert alert-danger d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-wifi-off me-2"></i> {{ loadError }}
+    </div>
+  }
+
+  @if (returnSuccess) {
+    <div class="alert alert-success alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i> {{ returnSuccess }}
+      <button type="button" class="btn-close ms-auto" (click)="returnSuccess = ''"></button>
+    </div>
+  }
+
+  @if (returnError) {
+    <div class="alert alert-danger alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ returnError }}
+      <button type="button" class="btn-close ms-auto" (click)="returnError = ''"></button>
+    </div>
+  }
+
+  <!-- Return form panel -->
+  @if (returnLoanId !== null) {
+    <div class="card border-success shadow-sm mb-4">
+      <div class="card-header bg-success text-white">
+        <i class="bi bi-box-arrow-in-left me-1"></i> Register Return — Loan ID {{ returnLoanId }}
+      </div>
+      <div class="card-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label">Notes (optional)</label>
+            <input type="text" class="form-control" [(ngModel)]="returnNotes"
+              placeholder="e.g. Returned in good condition" [disabled]="returnLoading">
+          </div>
+          <div class="col-md-6 d-flex gap-2">
+            <button class="btn btn-success" (click)="confirmReturn()" [disabled]="returnLoading">
+              @if (returnLoading) {
+                <span class="spinner-border spinner-border-sm me-1"></span> Processing...
+              } @else {
+                <i class="bi bi-check-lg me-1"></i> Confirm Return
+              }
+            </button>
+            <button class="btn btn-outline-secondary" (click)="cancelReturn()" [disabled]="returnLoading">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Items currently on loan -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+      <i class="bi bi-hourglass-split me-1"></i> Items Currently On Loan
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Total Stock</th>
+            <th>Available</th>
+            <th>Units Out</th>
+            <th>Register Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of itemsOnLoan; track item.item_id) {
+            <tr>
+              <td><strong>{{ item.name }}</strong></td>
+              <td><span class="badge bg-secondary">{{ item.category_name ?? '—' }}</span></td>
+              <td>{{ item.total_stock }}</td>
+              <td><span class="badge bg-warning text-dark">{{ item.available_stock }}</span></td>
+              <td><span class="badge bg-danger">{{ item.total_stock - item.available_stock }}</span></td>
+              <td>
+                <div class="input-group input-group-sm justify-content-center" style="max-width: 220px; margin: auto;">
+                  <input type="number" class="form-control" placeholder="Loan ID" min="1"
+                    [value]="returnLoanId ?? ''"
+                    (input)="openReturn(+($any($event.target).value))"
+                    [disabled]="returnLoading">
+                  <button class="btn btn-outline-success" (click)="confirmReturn()" [disabled]="returnLoading">
+                    @if (returnLoading) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                      <i class="bi bi-box-arrow-in-left"></i> Return
+                    }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-muted py-4">
+                <i class="bi bi-check-circle text-success me-1"></i> No items currently on loan.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

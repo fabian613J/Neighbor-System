@@ -1,0 +1,25 @@
+<div class="p-4">
+  <h4 class="mb-4"><i class="bi bi-boxes me-2"></i>Inventory Management</h4>
+
+  @if (loadError) {
+    <div class="alert alert-danger d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-wifi-off me-2"></i> {{ loadError }}
+    </div>
+  }
+
+  @if (addError) {
+    <div class="alert alert-danger alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ addError }}
+      <button type="button" class="btn-close ms-auto" (click)="addError = ''"></button>
+    </div>
+  }
+
+  <app-formularioprod (productoCreado)="onProductoAgregado($event)"></app-formularioprod>
+
+  <hr class="my-4">
+
+  <app-tabla-inventario
+    [misProductos]="items"
+    (inventarioActualizado)="cargarInventario()">
+  </app-tabla-inventario>
+</div>

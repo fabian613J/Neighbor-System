@@ -4,38 +4,169 @@
       <thead class="table-dark">
         <tr>
           <th>ID</th>
-          <th>Neighbor</th>
           <th>Item</th>
-          <th>Stock</th>
-          <th>Exchange / Trade</th>
+          <th>Category</th>
+          <th>Available</th>
+          <th>Total Stock</th>
+          <th>Condition</th>
+          <th>Location</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        @for (item of misProductos; track item.id) {
+        @for (item of misProductos; track item.item_id) {
+
           <tr>
-            <td>{{ item.id }}</td>
-            <td><strong>{{ item.vecino }}</strong></td>
-            <td>{{ item.objeto }}</td>
+            <td>{{ item.item_id }}</td>
+            <td><strong>{{ item.name }}</strong></td>
+            <td><span class="badge bg-secondary">{{ item.category_name ?? '—' }}</span></td>
             <td>
-              <span class="badge" [class.bg-success]="item.cantidad > 0" [class.bg-danger]="item.cantidad <= 0">
-                {{ item.cantidad }}
+              <span class="badge"
+                [class.bg-success]="item.available_stock > 0"
+                [class.bg-danger]="item.available_stock <= 0">
+                {{ item.available_stock }}
               </span>
             </td>
+            <td>{{ item.total_stock }}</td>
             <td>
-              <i class="bi bi-arrow-left-right text-primary me-1"></i> 
-              {{ item.intercambio }}
+              <span class="badge"
+                [class.bg-success]="item.condition === 'new'"
+                [class.bg-primary]="item.condition === 'good'"
+                [class.bg-warning]="item.condition === 'fair'"
+                [class.bg-danger]="item.condition === 'poor'">
+                {{ item.condition ?? '—' }}
+              </span>
             </td>
+            <td class="text-muted small">{{ item.location_notes ?? '—' }}</td>
             <td>
-              <button class="btn btn-sm btn-outline-danger" (click)="notificarEliminacion(item.id)">
-                <i class="bi bi-trash"></i>
-              </button>
+              <div class="d-flex justify-content-center gap-1">
+                @if (item.available_stock > 0) {
+                  <button class="btn btn-sm btn-outline-primary" title="Register a loan"
+                    (click)="openLoanPanel(item.item_id!)">
+                    <i class="bi bi-box-arrow-right"></i> Loan
+                  </button>
+                }
+                <button class="btn btn-sm btn-outline-success" title="Register a return"
+                  (click)="openReturnPanel(item.item_id!)">
+                  <i class="bi bi-box-arrow-in-left"></i> Return
+                </button>
+              </div>
             </td>
           </tr>
+
+          <!-- Inline loan panel -->
+          @if (loanPanelItemId === item.item_id) {
+            <tr class="table-primary">
+              <td colspan="8">
+                <div class="p-3 text-start">
+                  <h6 class="mb-2">
+                    <i class="bi bi-box-arrow-right me-1"></i>
+                    Register Loan — <strong>{{ item.name }}</strong>
+                  </h6>
+
+                  @if (loanError) {
+                    <div class="alert alert-danger alert-dismissible d-flex align-items-center py-2 mb-2" role="alert">
+                      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                      <span>{{ loanError }}</span>
+                      <button type="button" class="btn-close ms-auto" (click)="loanError = ''"></button>
+                    </div>
+                  }
+
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                      <label class="form-label form-label-sm">Neighbor ID</label>
+                      <input type="number" class="form-control form-control-sm"
+                        placeholder="e.g. 2" [(ngModel)]="loanForm.borrower_id"
+                        min="1" [disabled]="loanLoading">
+                    </div>
+                    <div class="col-md-2">
+                      <label class="form-label form-label-sm">Quantity</label>
+                      <input type="number" class="form-control form-control-sm"
+                        [(ngModel)]="loanForm.quantity_borrowed"
+                        min="1" [max]="item.available_stock" [disabled]="loanLoading">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label form-label-sm">Expected Return Date</label>
+                      <input type="date" class="form-control form-control-sm"
+                        [(ngModel)]="loanForm.expected_return_date" [disabled]="loanLoading">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label form-label-sm">Notes (optional)</label>
+                      <input type="text" class="form-control form-control-sm"
+                        placeholder="Any relevant notes"
+                        [(ngModel)]="loanForm.notes" [disabled]="loanLoading">
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                      <button class="btn btn-sm btn-primary" (click)="submitLoan(item)" [disabled]="loanLoading">
+                        @if (loanLoading) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          <i class="bi bi-check-lg"></i> Confirm
+                        }
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="closeLoanPanel()" [disabled]="loanLoading">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+
+          <!-- Inline return panel -->
+          @if (returnPanelItemId === item.item_id) {
+            <tr class="table-success">
+              <td colspan="8">
+                <div class="p-3 text-start">
+                  <h6 class="mb-2">
+                    <i class="bi bi-box-arrow-in-left me-1"></i>
+                    Register Return — <strong>{{ item.name }}</strong>
+                  </h6>
+
+                  @if (returnError) {
+                    <div class="alert alert-danger alert-dismissible d-flex align-items-center py-2 mb-2" role="alert">
+                      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                      <span>{{ returnError }}</span>
+                      <button type="button" class="btn-close ms-auto" (click)="returnError = ''"></button>
+                    </div>
+                  }
+
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                      <label class="form-label form-label-sm">Loan ID</label>
+                      <input type="number" class="form-control form-control-sm"
+                        placeholder="e.g. 5" [(ngModel)]="returnForm.loan_id"
+                        min="1" [disabled]="returnLoading">
+                    </div>
+                    <div class="col-md-5">
+                      <label class="form-label form-label-sm">Notes (optional)</label>
+                      <input type="text" class="form-control form-control-sm"
+                        placeholder="e.g. Returned in good condition"
+                        [(ngModel)]="returnForm.notes" [disabled]="returnLoading">
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                      <button class="btn btn-sm btn-success" (click)="submitReturn()" [disabled]="returnLoading">
+                        @if (returnLoading) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          <i class="bi bi-check-lg"></i> Confirm Return
+                        }
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="closeReturnPanel()" [disabled]="returnLoading">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+
         } @empty {
           <tr>
-            <td colspan="6" class="text-muted py-4">
-              <i class="bi bi-info-circle"></i> No items found in the neighborhood network.
+            <td colspan="8" class="text-muted py-4">
+              <i class="bi bi-info-circle"></i> No items found in the neighborhood inventory.
             </td>
           </tr>
         }

@@ -1,54 +1,63 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError, of, delay, retry } from 'rxjs';
-import { Item } from '../product';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map, catchError, of, retry } from 'rxjs';
+import { Category, NeighborhoodItem, ItemLoan, ItemLoanCreate, ReturnUpdate } from '../product';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItemService {
-  // Cambiamos a 127.0.0.1 para evitar problemas de resolución de DNS de localhost en Windows
-  private apiUrl = 'http://127.0.0.1:8000/items';
+  private readonly base = 'http://127.0.0.1:8000';
+  private readonly itemsUrl = `${this.base}/neighborhood-items`;
+  private readonly loansUrl = `${this.base}/item-loans`;
+  private readonly categoriesUrl = `${this.base}/categories`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  /**
-   * GET: Fetch items with high availability logic
-   */
-  getItems(): Observable<Item[]> {
-    return this.http.get<any>(this.apiUrl).pipe(
-      // Reintentamos una vez si la conexión falla momentáneamente
-      retry(1), 
-      map(response => {
-        console.log('Service Layer - Raw Response:', response);
+  // ── Categories ──────────────────────────────────────────────────────────────
 
-        // Caso 1: La respuesta es el arreglo directo (Lo más probable en tu FastAPI)
-        if (Array.isArray(response)) {
-          return response;
-        }
-
-        // Caso 2: La respuesta viene envuelta (e.g., FastAPI devolviendo un JSON con llave 'data')
-        if (response && typeof response === 'object' && Array.isArray(response.data)) {
-          return response.data;
-        }
-
-        // Caso 3: Respuesta inesperada o vacía
-        console.warn('Service Layer - Response is not an array, returning empty list');
-        return [];
-      }),
+  /** GET /categories — list all active categories */
+  getCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(this.categoriesUrl).pipe(
       catchError(error => {
-        console.error('Service Layer - Critical Connection Error:', error);
-        // Retornamos un 'Observable' de un arreglo vacío para que el componente no se rompa
+        console.error('ItemService.getCategories error:', error);
         return of([]);
       })
     );
   }
 
-  addItem(item: Item): Observable<Item> {
-    return this.http.post<Item>(this.apiUrl, item);
+  // ── Neighborhood Items ──────────────────────────────────────────────────────
+
+  /** GET /neighborhood-items — optionally filter by category or availability */
+  getItems(filters?: { category_id?: number; is_available?: boolean }): Observable<NeighborhoodItem[]> {
+    let params = new HttpParams();
+    if (filters?.category_id != null) params = params.set('category_id', filters.category_id);
+    if (filters?.is_available != null) params = params.set('is_available', filters.is_available);
+
+    return this.http.get<NeighborhoodItem[]>(this.itemsUrl, { params }).pipe(
+      retry(1),
+      map(response => (Array.isArray(response) ? response : [])),
+      catchError(error => {
+        console.error('ItemService.getItems error:', error);
+        return of([]);
+      })
+    );
   }
 
-  deleteItem(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  /** POST /neighborhood-items — register a new community item */
+  addItem(item: Omit<NeighborhoodItem, 'item_id' | 'category_name'>): Observable<NeighborhoodItem> {
+    return this.http.post<NeighborhoodItem>(this.itemsUrl, item);
+  }
+
+  // ── Item Loans ──────────────────────────────────────────────────────────────
+
+  /** POST /item-loans — register a new loan */
+  createLoan(loan: ItemLoanCreate): Observable<ItemLoan> {
+    return this.http.post<ItemLoan>(this.loansUrl, loan);
+  }
+
+  /** PUT /item-loans/{id}/return — mark a loan as returned */
+  returnLoan(loanId: number, payload: ReturnUpdate): Observable<ItemLoan> {
+    return this.http.put<ItemLoan>(`${this.loansUrl}/${loanId}/return`, payload);
   }
 }

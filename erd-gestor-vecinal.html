@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERD – Gestor Vecinal (Friendly Neighbourhood)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
+    }
+    p {
+      color: #7f8c8d;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .mermaid {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #2c3e50;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .legend-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .legend-catalog    { background: #d0e8ff; }
+    .legend-transact   { background: #ffd6a5; }
+  </style>
+</head>
+<body>
+  <h1>ERD – Gestor Vecinal</h1>
+  <p>Friendly Neighbourhood · FastAPI + Angular · Generated with Mermaid.js</p>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-box legend-catalog"></div>
+      Catalog tables (neighbors, properties, categories)
+    </div>
+    <div class="legend-item">
+      <div class="legend-box legend-transact"></div>
+      Transactional tables (neighborhood_items, item_loans)
+    </div>
+  </div>
+
+  <div class="mermaid">
+erDiagram
+
+    %% ─────────────────────────────────────────
+    %% CATALOG TABLES
+    %% ─────────────────────────────────────────
+
+    neighbors {
+        INT         neighbor_id     PK
+        VARCHAR     username
+        VARCHAR     password_hash
+        VARCHAR     full_name
+        VARCHAR     email
+        VARCHAR     phone
+        VARCHAR     role
+        BOOLEAN     is_verified
+        BOOLEAN     is_active
+        TIMESTAMP   created_at
+        TIMESTAMP   updated_at
+    }
+
+    properties {
+        INT         property_id     PK
+        INT         owner_id        FK
+        VARCHAR     internal_address
+        VARCHAR     lot_number
+        VARCHAR     block
+        VARCHAR     property_type
+        BOOLEAN     is_active
+        TIMESTAMP   created_at
+    }
+
+    categories {
+        INT         category_id     PK
+        VARCHAR     name
+        VARCHAR     description
+        BOOLEAN     is_active
+    }
+
+    %% ─────────────────────────────────────────
+    %% TRANSACTIONAL TABLES
+    %% ─────────────────────────────────────────
+
+    neighborhood_items {
+        INT         item_id         PK
+        INT         category_id     FK
+        VARCHAR     name
+        VARCHAR     description
+        INT         total_stock
+        INT         available_stock
+        VARCHAR     condition
+        VARCHAR     location_notes
+        BOOLEAN     is_available
+        TIMESTAMP   created_at
+        TIMESTAMP   updated_at
+    }
+
+    item_loans {
+        INT         loan_id             PK
+        INT         item_id             FK
+        INT         borrower_id         FK
+        INT         approved_by_id      FK
+        TIMESTAMP   loan_date
+        TIMESTAMP   expected_return_date
+        TIMESTAMP   actual_return_date
+        VARCHAR     status
+        INT         quantity_borrowed
+        TEXT        notes
+        TIMESTAMP   created_at
+        TIMESTAMP   updated_at
+    }
+
+    %% ─────────────────────────────────────────
+    %% RELATIONSHIPS
+    %% ─────────────────────────────────────────
+
+    %% A property has one primary owner (neighbor), a neighbor can own one property
+    neighbors ||--o{ properties : "owns / resides at"
+
+    %% A property can house many neighbors (residents), each neighbor lives at one property
+    properties ||--o{ neighbors : "houses"
+
+    %% A category classifies many inventory items, an item belongs to exactly one category
+    categories ||--o{ neighborhood_items : "classifies"
+
+    %% A neighbor can request many loans over time
+    neighbors ||--o{ item_loans : "requests"
+
+    %% A neighbor (admin) can approve many loans
+    neighbors ||--o{ item_loans : "approves"
+
+    %% An inventory item can appear in many loan records over time
+    neighborhood_items ||--o{ item_loans : "is loaned via"
+
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "default",
+      er: {
+        diagramPadding: 40,
+        layoutDirection: "TB",
+        minEntityWidth: 100,
+        minEntityHeight: 75,
+        entityPadding: 15,
+        useMaxWidth: true
+      }
+    });
+
+    // After Mermaid renders, color the entity header rects by table type
+    mermaid.init(undefined, document.querySelector('.mermaid')).then(() => {
+      colorEntities();
+    }).catch(() => {
+      // Fallback: wait for SVG to appear via MutationObserver
+      const observer = new MutationObserver(() => {
+        const svg = document.querySelector('.mermaid svg');
+        if (svg) { observer.disconnect(); colorEntities(); }
+      });
+      observer.observe(document.querySelector('.mermaid'), { childList: true, subtree: true });
+    });
+
+    const CATALOG      = new Set(['neighbors', 'properties', 'categories']);
+    const TRANSACTIONAL = new Set(['neighborhood_items', 'item_loans']);
+
+    // Catalog  → blue  #d0e8ff header / #eaf4ff rows
+    // Transact → amber #ffd6a5 header / #fff3e0 rows
+    function colorEntities() {
+      const svg = document.querySelector('.mermaid svg');
+      if (!svg) return;
+
+      svg.querySelectorAll('g.er.entityBox, g[id]').forEach(g => {
+        // Mermaid wraps each entity in a <g> whose first <text> is the table name
+        const label = g.querySelector('text');
+        if (!label) return;
+        const name = label.textContent.trim();
+
+        const rects = g.querySelectorAll('rect');
+        if (!rects.length) return;
+
+        if (CATALOG.has(name)) {
+          rects[0].style.fill = '#d0e8ff'; // header rect
+          rects[0].style.stroke = '#5b9bd5';
+          for (let i = 1; i < rects.length; i++) {
+            rects[i].style.fill = '#eaf4ff';
+            rects[i].style.stroke = '#5b9bd5';
+          }
+          label.style.fill = '#1a3a5c';
+        } else if (TRANSACTIONAL.has(name)) {
+          rects[0].style.fill = '#ffd6a5'; // header rect
+          rects[0].style.stroke = '#e07b00';
+          for (let i = 1; i < rects.length; i++) {
+            rects[i].style.fill = '#fff3e0';
+            rects[i].style.stroke = '#e07b00';
+          }
+          label.style.fill = '#5c2e00';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

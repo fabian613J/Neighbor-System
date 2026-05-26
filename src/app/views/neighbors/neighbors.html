@@ -1,0 +1,59 @@
+<div class="p-4">
+  <h4 class="mb-4"><i class="bi bi-people me-2"></i>Neighbors Directory</h4>
+
+  @if (loading) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div> Loading neighbors...
+    </div>
+  } @else if (error) {
+    <div class="alert alert-warning">{{ error }}</div>
+  } @else {
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-center">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Verified</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (neighbor of neighbors; track neighbor.neighbor_id) {
+              <tr>
+                <td>{{ neighbor.neighbor_id }}</td>
+                <td><strong>{{ neighbor.full_name }}</strong></td>
+                <td class="text-muted">{{ neighbor.username }}</td>
+                <td class="small">{{ neighbor.email ?? '—' }}</td>
+                <td class="small">{{ neighbor.phone ?? '—' }}</td>
+                <td>
+                  <span class="badge" [class.bg-danger]="neighbor.role === 'admin'" [class.bg-secondary]="neighbor.role !== 'admin'">
+                    {{ neighbor.role }}
+                  </span>
+                </td>
+                <td>
+                  <i class="bi" [class.bi-patch-check-fill]="neighbor.is_verified" [class.text-success]="neighbor.is_verified"
+                    [class.bi-patch-question]="!neighbor.is_verified" [class.text-warning]="!neighbor.is_verified"></i>
+                </td>
+                <td>
+                  <span class="badge" [class.bg-success]="neighbor.is_active" [class.bg-secondary]="!neighbor.is_active">
+                    {{ neighbor.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="text-muted py-4">No neighbors found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

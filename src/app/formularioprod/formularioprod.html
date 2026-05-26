@@ -1,24 +1,83 @@
 <div class="card p-4 shadow-sm mb-4 bg-light">
-  <h5 class="text-secondary mb-3"><i class="bi bi-tools"></i> Register Item to Lend</h5>
+  <h5 class="text-secondary mb-3"><i class="bi bi-tools"></i> Register Community Item</h5>
+
+  <!-- Error alert -->
+  @if (errorMsg) {
+    <div class="alert alert-danger alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span>{{ errorMsg }}</span>
+      <button type="button" class="btn-close ms-auto" (click)="dismissError()"></button>
+    </div>
+  }
+
+  <!-- Success alert -->
+  @if (successMsg) {
+    <div class="alert alert-success alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <span>{{ successMsg }}</span>
+      <button type="button" class="btn-close ms-auto" (click)="dismissSuccess()"></button>
+    </div>
+  }
+
   <div class="row g-3">
-    <div class="col-md-3">
-      <label class="form-label">Your Name (Neighbor)</label>
-      <input type="text" [(ngModel)]="nuevoProd.vecino" class="form-control" placeholder="e.g., Carlos">
-    </div>
-    <div class="col-md-3">
-      <label class="form-label">Item</label>
-      <input type="text" [(ngModel)]="nuevoProd.objeto" class="form-control" placeholder="e.g., Broom">
-    </div>
-    <div class="col-md-2">
-      <label class="form-label">Quantity</label>
-      <input type="number" [(ngModel)]="nuevoProd.cantidad" class="form-control">
-    </div>
     <div class="col-md-4">
-      <label class="form-label">Exchange (Trade or Price)</label>
-      <input type="text" [(ngModel)]="nuevoProd.intercambio" class="form-control" placeholder="e.g., For a lawn mower">
+      <label class="form-label">Item Name</label>
+      <input type="text" [(ngModel)]="nuevoItem.name" class="form-control"
+        placeholder="e.g., Electric Drill" [disabled]="isLoading">
     </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Category</label>
+      <select [(ngModel)]="nuevoItem.category_id" class="form-select" [disabled]="isLoading">
+        <option [value]="0" disabled>Select a category</option>
+        @for (cat of categories; track cat.category_id) {
+          <option [value]="cat.category_id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Total Stock</label>
+      <input type="number" [(ngModel)]="nuevoItem.total_stock" class="form-control"
+        min="1" [disabled]="isLoading">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Available Stock</label>
+      <input type="number" [(ngModel)]="nuevoItem.available_stock" class="form-control"
+        min="0" [disabled]="isLoading">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Condition</label>
+      <select [(ngModel)]="nuevoItem.condition" class="form-select" [disabled]="isLoading">
+        <option value="new">New</option>
+        <option value="good">Good</option>
+        <option value="fair">Fair</option>
+        <option value="poor">Poor</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Description</label>
+      <input type="text" [(ngModel)]="nuevoItem.description" class="form-control"
+        placeholder="e.g., Cordless 18V drill" [disabled]="isLoading">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Location Notes</label>
+      <input type="text" [(ngModel)]="nuevoItem.location_notes" class="form-control"
+        placeholder="e.g., Storage room A, shelf 1" [disabled]="isLoading">
+    </div>
+
     <div class="col-md-12 text-end">
-      <button class="btn btn-primary" (click)="agregar()">Save to Neighborhood Network</button>
+      <button class="btn btn-primary" (click)="agregar()" [disabled]="isLoading">
+        @if (isLoading) {
+          <span class="spinner-border spinner-border-sm me-1"></span> Saving...
+        } @else {
+          <i class="bi bi-plus-circle me-1"></i> Add to Inventory
+        }
+      </button>
     </div>
   </div>
 </div>

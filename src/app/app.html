@@ -1,41 +1,53 @@
-<div class="container mt-5">
+@if (!isLoggedIn) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="app-layout">
 
-  <div class="card shadow mb-4">
-    <div class="card-body text-center bg-primary text-white rounded">
-      <h1 class="font-weight-bold">
-        <i class="bi bi-box-seam"></i> Neighborhood Inventory
-      </h1>
-      <p class="mb-0">Secure community management system</p>
-    </div>
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column">
+      <div class="sidebar-brand">
+        <i class="bi bi-houses-fill me-2"></i>
+        <span>Friendly<br><strong>Neighbourhood</strong></span>
+      </div>
+
+      <ul class="nav flex-column flex-grow-1 mt-3">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/inventory" routerLinkActive="active">
+            <i class="bi bi-boxes me-2"></i> Inventory
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/loans" routerLinkActive="active">
+            <i class="bi bi-arrow-left-right me-2"></i> Loans
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/neighbors" routerLinkActive="active">
+            <i class="bi bi-people me-2"></i> Neighbors
+          </a>
+        </li>
+      </ul>
+
+      <!-- User info + logout at bottom -->
+      <div class="sidebar-footer">
+        <div class="text-white-50 small mb-2">
+          <i class="bi bi-person-circle me-1"></i> {{ currentUser() }}
+        </div>
+        <button class="btn btn-outline-light btn-sm w-100" (click)="logout()">
+          <i class="bi bi-door-open me-1"></i> Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
   </div>
-
-  @if (!currentUser()) {
-    
-    <app-login></app-login>
-
-  } @else {
-    
-    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-light border rounded shadow-sm">
-      <h4 class="text-secondary mb-0">
-        <i class="bi bi-person-circle"></i> Welcome, <strong>{{ currentUser() }}</strong>
-      </h4>
-      <button class="btn btn-outline-danger btn-sm" (click)="logout()">
-        <i class="bi bi-door-open"></i> Logout
-      </button>
-    </div>
-
-    <app-formularioprod (productoCreado)="onProductoAgregado($event)"></app-formularioprod>
-
-    <hr class="my-4">
-
-    <app-tabla-inventario 
-      [misProductos]="listaGlobal" 
-      (productoEliminado)="onEliminarProducto($event)">
-    </app-tabla-inventario>
-
-    <div class="mt-5 p-2 bg-dark text-success rounded">
-      <small>System Status: Secured Connection Active</small>
-    </div>
-  }
-
-</div>
+}
