@@ -26,6 +26,10 @@ export class AuthService {
     );
   }
 
+  register(payload: { username: string; password: string; full_name: string; email?: string; phone?: string }) {
+    return this.http.post<any>(`${this.apiUrl}/auth/register`, payload);
+  }
+
   isLoggedIn(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
     return !!localStorage.getItem('token');

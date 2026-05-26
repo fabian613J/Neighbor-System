@@ -1,4 +1,11 @@
 <div class="app-layout" [class.has-sidebar]="showSidebar()">
+  <!-- Top bar — shown when NOT logged in -->
+  @if (!showSidebar()) {
+    <div class="topbar d-flex justify-content-end p-3 bg-white border-bottom">
+      <a class="btn btn-link me-2" routerLink="/login">Login</a>
+      <a class="btn btn-primary" routerLink="/register">Register</a>
+    </div>
+  }
 
   <!-- Sidebar — only visible when logged in -->
   @if (showSidebar()) {

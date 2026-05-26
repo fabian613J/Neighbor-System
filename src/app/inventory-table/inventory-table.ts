@@ -17,16 +17,16 @@ interface ReturnForm {
 }
 
 @Component({
-  selector: 'app-tabla-inventario',
+  selector: 'app-inventory-table, app-tabla-inventario',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './tabla-inventario.html',
-  styleUrl: './tabla-inventario.css',
+  templateUrl: './inventory-table.html',
+  styleUrl: './inventory-table.css',
 })
-export class TablaInventario {
-  @Input() misProductos: NeighborhoodItem[] = [];
-  @Output() productoEliminado = new EventEmitter<number>();
-  @Output() inventarioActualizado = new EventEmitter<void>();
+export class InventoryTableComponent {
+  @Input() items: NeighborhoodItem[] = [];
+  @Output() productDeleted = new EventEmitter<number>();
+  @Output() inventoryUpdated = new EventEmitter<void>();
 
   loanPanelItemId: number | null = null;
   returnPanelItemId: number | null = null;
@@ -40,8 +40,6 @@ export class TablaInventario {
   returnError = '';
 
   constructor(private itemService: ItemService) {}
-
-  // ── Loan panel ──────────────────────────────────────────────────────────────
 
   openLoanPanel(itemId: number): void {
     this.loanPanelItemId = itemId;
@@ -81,7 +79,7 @@ export class TablaInventario {
       next: () => {
         this.loanLoading = false;
         this.closeLoanPanel();
-        this.inventarioActualizado.emit();
+        this.inventoryUpdated.emit();
       },
       error: (err) => {
         this.loanLoading = false;
@@ -89,8 +87,6 @@ export class TablaInventario {
       },
     });
   }
-
-  // ── Return panel ─────────────────────────────────────────────────────────────
 
   openReturnPanel(itemId: number): void {
     this.returnPanelItemId = itemId;
@@ -122,7 +118,7 @@ export class TablaInventario {
         next: () => {
           this.returnLoading = false;
           this.closeReturnPanel();
-          this.inventarioActualizado.emit();
+          this.inventoryUpdated.emit();
         },
         error: (err) => {
           this.returnLoading = false;
@@ -131,8 +127,8 @@ export class TablaInventario {
       });
   }
 
-  notificarEliminacion(id: number | undefined): void {
-    if (id != null) this.productoEliminado.emit(id);
+  notifyDeletion(id: number | undefined): void {
+    if (id != null) this.productDeleted.emit(id);
   }
 
   private emptyLoanForm(): LoanForm {

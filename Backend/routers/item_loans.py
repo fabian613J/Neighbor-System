@@ -136,3 +136,28 @@ def return_loan(loan_id: int, payload: ReturnUpdate, db: Session = Depends(get_d
     out.item_name     = item.name if item else None
     out.borrower_name = loan.borrower.full_name if loan.borrower else None
     return out
+
+
+@router.get("/neighbor/{neighbor_id}", response_model=list)
+def get_loans_by_neighbor(neighbor_id: int, db: Session = Depends(get_db)):
+    """Get all loans (active and returned) for a specific neighbor as borrower."""
+    # Validate neighbor exists
+    neighbor = db.query(Neighbor).filter(
+        Neighbor.neighbor_id == neighbor_id
+    ).first()
+    if not neighbor:
+        raise HTTPException(status_code=404, detail=f"Neighbor {neighbor_id} not found.")
+
+    # Get all loans for this neighbor
+    loans = db.query(ItemLoan).filter(
+        ItemLoan.borrower_id == neighbor_id
+    ).order_by(ItemLoan.loan_date.desc()).all()
+
+    result = []
+    for loan in loans:
+        out = ItemLoanOut.model_validate(loan)
+        out.item_name = loan.item.name if loan.item else None
+        out.borrower_name = loan.borrower.full_name if loan.borrower else None
+        result.append(out)
+
+    return result

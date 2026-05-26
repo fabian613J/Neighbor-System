@@ -4,6 +4,16 @@
   min-height: 100vh;
 }
 
+/* When there is no sidebar (e.g. login/register pages), stack topbar above main */
+.app-layout:not(.has-sidebar) {
+  flex-direction: column;
+}
+
+/* Ensure topbar spans full width */
+.topbar {
+  width: 100%;
+}
+
 /* When sidebar is hidden (login page), main takes full width */
 .main-content {
   flex: 1;

@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TablaInventario } from '../../tabla-inventario/tabla-inventario';
-import { FormularioprodComponent } from '../../formularioprod/formularioprod';
+import { InventoryTableComponent } from '../../inventory-table/inventory-table';
+import { ProductFormComponent } from '../../product-form/product-form';
 import { ItemService } from '../../services/item';
 import { NeighborhoodItem } from '../../product';
 import { Router, NavigationEnd } from '@angular/router';
@@ -11,7 +11,7 @@ import { filter } from 'rxjs';
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, TablaInventario, FormularioprodComponent],
+  imports: [CommonModule, InventoryTableComponent, ProductFormComponent],
   templateUrl: './inventory.html',
 })
 export class InventoryComponent implements OnInit {
@@ -60,7 +60,7 @@ export class InventoryComponent implements OnInit {
     });
   }
 
-  onProductoAgregado(newItem: Omit<NeighborhoodItem, 'item_id' | 'category_name'>): void {
+  onProductAdded(newItem: Omit<NeighborhoodItem, 'item_id' | 'category_name'>): void {
     this.addError = '';
     this.itemService.addItem(newItem).subscribe({
       next: () => this.cargarInventario(),

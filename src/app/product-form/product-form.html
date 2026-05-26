@@ -22,13 +22,13 @@
   <div class="row g-3">
     <div class="col-md-4">
       <label class="form-label">Item Name</label>
-      <input type="text" [(ngModel)]="nuevoItem.name" class="form-control"
+      <input type="text" [(ngModel)]="newItem.name" class="form-control"
         placeholder="e.g., Electric Drill" [disabled]="isLoading">
     </div>
 
     <div class="col-md-2">
       <label class="form-label">Category</label>
-      <select [(ngModel)]="nuevoItem.category_id" class="form-select" [disabled]="isLoading">
+      <select [(ngModel)]="newItem.category_id" class="form-select" [disabled]="isLoading">
         <option [value]="0" disabled>Select a category</option>
         @for (cat of categories; track cat.category_id) {
           <option [value]="cat.category_id">{{ cat.name }}</option>
@@ -38,19 +38,19 @@
 
     <div class="col-md-2">
       <label class="form-label">Total Stock</label>
-      <input type="number" [(ngModel)]="nuevoItem.total_stock" class="form-control"
+      <input type="number" [(ngModel)]="newItem.total_stock" class="form-control"
         min="1" [disabled]="isLoading">
     </div>
 
     <div class="col-md-2">
       <label class="form-label">Available Stock</label>
-      <input type="number" [(ngModel)]="nuevoItem.available_stock" class="form-control"
+      <input type="number" [(ngModel)]="newItem.available_stock" class="form-control"
         min="0" [disabled]="isLoading">
     </div>
 
     <div class="col-md-2">
       <label class="form-label">Condition</label>
-      <select [(ngModel)]="nuevoItem.condition" class="form-select" [disabled]="isLoading">
+      <select [(ngModel)]="newItem.condition" class="form-select" [disabled]="isLoading">
         <option value="new">New</option>
         <option value="good">Good</option>
         <option value="fair">Fair</option>
@@ -60,18 +60,18 @@
 
     <div class="col-md-6">
       <label class="form-label">Description</label>
-      <input type="text" [(ngModel)]="nuevoItem.description" class="form-control"
+      <input type="text" [(ngModel)]="newItem.description" class="form-control"
         placeholder="e.g., Cordless 18V drill" [disabled]="isLoading">
     </div>
 
     <div class="col-md-6">
       <label class="form-label">Location Notes</label>
-      <input type="text" [(ngModel)]="nuevoItem.location_notes" class="form-control"
+      <input type="text" [(ngModel)]="newItem.location_notes" class="form-control"
         placeholder="e.g., Storage room A, shelf 1" [disabled]="isLoading">
     </div>
 
     <div class="col-md-12 text-end">
-      <button class="btn btn-primary" (click)="agregar()" [disabled]="isLoading">
+      <button class="btn btn-primary" (click)="add()" [disabled]="isLoading">
         @if (isLoading) {
           <span class="spinner-border spinner-border-sm me-1"></span> Saving...
         } @else {

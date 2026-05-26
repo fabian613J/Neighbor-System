@@ -55,4 +55,14 @@ export class ItemService {
   returnLoan(loanId: number, payload: ReturnUpdate): Observable<ItemLoan> {
     return this.http.put<ItemLoan>(`${this.loansUrl}/${loanId}/return`, payload);
   }
+
+  /** GET /item-loans/neighbor/{id} — get all loans for a specific neighbor */
+  getLoansByNeighbor(neighborId: number): Observable<ItemLoan[]> {
+    return this.http.get<ItemLoan[]>(`${this.loansUrl}/neighbor/${neighborId}`).pipe(
+      catchError(error => {
+        console.error('ItemService.getLoansByNeighbor error:', error);
+        return of([]);
+      })
+    );
+  }
 }

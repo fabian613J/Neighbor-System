@@ -5,17 +5,17 @@ import { Category, NeighborhoodItem } from '../product';
 import { ItemService } from '../services/item';
 
 @Component({
-  selector: 'app-formularioprod',
+  selector: 'app-product-form',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './formularioprod.html',
-  styleUrl: './formularioprod.css',
+  templateUrl: './product-form.html',
+  styleUrl: './product-form.css',
 })
-export class FormularioprodComponent implements OnInit {
-  @Output() productoCreado = new EventEmitter<Omit<NeighborhoodItem, 'item_id' | 'category_name'>>();
+export class ProductFormComponent implements OnInit {
+  @Output() productCreated = new EventEmitter<Omit<NeighborhoodItem, 'item_id' | 'category_name'>>();
 
   categories: Category[] = [];
-  nuevoItem: Omit<NeighborhoodItem, 'item_id' | 'category_name'> = this.emptyItem();
+  newItem: Omit<NeighborhoodItem, 'item_id' | 'category_name'> = this.emptyItem();
 
   isLoading = false;
   errorMsg = '';
@@ -30,25 +30,23 @@ export class FormularioprodComponent implements OnInit {
     });
   }
 
-  agregar(): void {
+  add(): void {
     this.errorMsg = '';
     this.successMsg = '';
 
-    if (!this.nuevoItem.name.trim() || this.nuevoItem.category_id < 1) {
+    if (!this.newItem.name.trim() || this.newItem.category_id < 1) {
       this.errorMsg = 'Please enter an item name and select a valid category.';
       return;
     }
-    if (this.nuevoItem.available_stock > this.nuevoItem.total_stock) {
+    if (this.newItem.available_stock > this.newItem.total_stock) {
       this.errorMsg = 'Available stock cannot exceed total stock.';
       return;
     }
 
     this.isLoading = true;
-    this.productoCreado.emit({ ...this.nuevoItem });
+    this.productCreated.emit({ ...this.newItem });
 
-    // Reset after emit — parent handles the HTTP call and will call back if needed.
-    // We clear the form optimistically; errors bubble up via the parent.
-    this.nuevoItem = this.emptyItem();
+    this.newItem = this.emptyItem();
     this.successMsg = 'Item submitted successfully.';
     this.isLoading = false;
   }

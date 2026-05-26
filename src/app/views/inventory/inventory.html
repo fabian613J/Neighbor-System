@@ -14,12 +14,12 @@
     </div>
   }
 
-  <app-formularioprod (productoCreado)="onProductoAgregado($event)"></app-formularioprod>
+  <app-product-form (productCreated)="onProductAdded($event)"></app-product-form>
 
   <hr class="my-4">
 
-  <app-tabla-inventario
-    [misProductos]="items"
-    (inventarioActualizado)="cargarInventario()">
-  </app-tabla-inventario>
+  <app-inventory-table
+    [items]="items"
+    (inventoryUpdated)="cargarInventario()">
+  </app-inventory-table>
 </div>

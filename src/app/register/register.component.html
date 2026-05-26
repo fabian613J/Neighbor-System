@@ -1,0 +1,38 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card shadow">
+        <div class="card-body">
+          <h3 class="text-center mb-4"><i class="bi bi-person-plus"></i> Create Account</h3>
+
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" [(ngModel)]="full_name" class="form-control" placeholder="e.g. John Doe">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" [(ngModel)]="username" class="form-control" placeholder="e.g. john_doe">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email (optional)</label>
+            <input type="email" [(ngModel)]="email" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Phone (optional)</label>
+            <input type="text" [(ngModel)]="phone" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" [(ngModel)]="password" class="form-control">
+          </div>
+
+          <button class="btn btn-primary w-100" (click)="onRegister()">Create account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
