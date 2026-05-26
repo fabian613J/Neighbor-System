@@ -4,6 +4,13 @@
   min-height: 100vh;
 }
 
+/* When sidebar is hidden (login page), main takes full width */
+.main-content {
+  flex: 1;
+  background: #f4f6f9;
+  overflow-y: auto;
+}
+
 /* ── Sidebar ────────────────────────────────────────────────────────────────── */
 .sidebar {
   width: 220px;

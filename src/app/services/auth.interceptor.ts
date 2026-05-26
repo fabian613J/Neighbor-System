@@ -1,20 +1,20 @@
+import { isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // 1. Obtenemos el token del localStorage
-  const token = localStorage.getItem('token');
-
-  // 2. Si el token existe, clonamos la petición y le añadimos el Header
-  if (token) {
-    const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    console.log('Interceptor: Token inyectado en la petición');
-    return next(cloned);
+  // localStorage is only available in the browser
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) {
+    return next(req);
   }
 
-  // 3. Si no hay token (ej. en el login o registro), la petición sigue normal
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    return next(req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    }));
+  }
+
   return next(req);
 };

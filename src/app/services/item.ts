@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, catchError, of, retry } from 'rxjs';
 import { Category, NeighborhoodItem, ItemLoan, ItemLoanCreate, ReturnUpdate } from '../product';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -37,10 +36,6 @@ export class ItemService {
     return this.http.get<NeighborhoodItem[]>(this.itemsUrl, { params }).pipe(
       retry(1),
       map(response => (Array.isArray(response) ? response : [])),
-      catchError(error => {
-        console.error('ItemService.getItems error:', error);
-        return of([]);
-      })
     );
   }
 

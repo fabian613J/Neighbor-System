@@ -1,9 +1,7 @@
-@if (!isLoggedIn) {
-  <router-outlet></router-outlet>
-} @else {
-  <div class="app-layout">
+<div class="app-layout" [class.has-sidebar]="showSidebar()">
 
-    <!-- Sidebar -->
+  <!-- Sidebar — only visible when logged in -->
+  @if (showSidebar()) {
     <nav class="sidebar d-flex flex-column">
       <div class="sidebar-brand">
         <i class="bi bi-houses-fill me-2"></i>
@@ -33,7 +31,6 @@
         </li>
       </ul>
 
-      <!-- User info + logout at bottom -->
       <div class="sidebar-footer">
         <div class="text-white-50 small mb-2">
           <i class="bi bi-person-circle me-1"></i> {{ currentUser() }}
@@ -43,11 +40,11 @@
         </button>
       </div>
     </nav>
+  }
 
-    <!-- Main content -->
-    <main class="main-content">
-      <router-outlet></router-outlet>
-    </main>
+  <!-- Single persistent router-outlet — with key to force recreation -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
 
-  </div>
-}
+</div>

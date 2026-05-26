@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { ItemService } from '../../services/item';
 import { NeighborhoodItem } from '../../product';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,21 +15,46 @@ import { NeighborhoodItem } from '../../product';
 export class DashboardComponent implements OnInit {
   allItems: NeighborhoodItem[] = [];
   loading = true;
+  private itemService = inject(ItemService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private itemService: ItemService) {}
+  constructor() {
+    console.log('[DASHBOARD] Constructor called');
+    // Recargar cada vez que navegamos A esta ruta
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd && event.urlAfterRedirects === '/dashboard'),
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        console.log('[DASHBOARD] Navigation detected');
+        // Usar setTimeout para asegurar que Angular ha terminado de procesar la navegación
+        setTimeout(() => this.load(), 10);
+      });
+  }
 
   ngOnInit(): void {
+    console.log('[DASHBOARD] ngOnInit called - first initialization');
     this.load();
   }
 
   load(): void {
+    console.log('[DASHBOARD] load() called, setting loading=true');
     this.loading = true;
+    this.cdr.markForCheck();
     this.itemService.getItems().subscribe({
       next: (items) => {
+        console.log('[DASHBOARD] Items loaded:', items.length, 'items');
         this.allItems = items;
         this.loading = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loading = false),
+      error: (err) => {
+        console.error('[DASHBOARD] Error loading items:', err);
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
