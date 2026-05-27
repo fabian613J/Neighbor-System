@@ -3,7 +3,7 @@
 #            PUT  /item-loans/{id}/return – mark a loan as returned
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
@@ -138,7 +138,7 @@ def return_loan(loan_id: int, payload: ReturnUpdate, db: Session = Depends(get_d
     return out
 
 
-@router.get("/neighbor/{neighbor_id}", response_model=list)
+@router.get("/neighbor/{neighbor_id}", response_model=List[ItemLoanOut])
 def get_loans_by_neighbor(neighbor_id: int, db: Session = Depends(get_db)):
     """Get all loans (active and returned) for a specific neighbor as borrower."""
     # Validate neighbor exists
@@ -151,6 +151,24 @@ def get_loans_by_neighbor(neighbor_id: int, db: Session = Depends(get_db)):
     # Get all loans for this neighbor
     loans = db.query(ItemLoan).filter(
         ItemLoan.borrower_id == neighbor_id
+    ).order_by(ItemLoan.loan_date.desc()).all()
+
+    result = []
+    for loan in loans:
+        out = ItemLoanOut.model_validate(loan)
+        out.item_name = loan.item.name if loan.item else None
+        out.borrower_name = loan.borrower.full_name if loan.borrower else None
+        result.append(out)
+
+    return result
+
+
+@router.get("/item/{item_id}/active", response_model=List[ItemLoanOut])
+def get_active_loans_by_item(item_id: int, db: Session = Depends(get_db)):
+    """Get active/overdue loans for a specific inventory item."""
+    loans = db.query(ItemLoan).filter(
+        ItemLoan.item_id == item_id,
+        ItemLoan.status.in_(["active", "overdue"]),
     ).order_by(ItemLoan.loan_date.desc()).all()
 
     result = []

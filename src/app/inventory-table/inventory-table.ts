@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ItemLoanCreate, NeighborhoodItem } from '../product';
+import { ItemLoan, ItemLoanCreate, NeighborhoodItem } from '../product';
 import { ItemService } from '../services/item';
+import { AuthService } from '../services/auth.services';
 
 interface LoanForm {
   borrower_id: number | null;
@@ -35,17 +36,19 @@ export class InventoryTableComponent {
   returnForm: ReturnForm = this.emptyReturnForm();
 
   loanLoading = false;
-  returnLoading = false;
   loanError = '';
-  returnError = '';
 
-  constructor(private itemService: ItemService) {}
+  constructor(
+    private itemService: ItemService,
+    private authService: AuthService
+  ) {}
 
   openLoanPanel(itemId: number): void {
     this.loanPanelItemId = itemId;
     this.returnPanelItemId = null;
-    this.loanForm = this.emptyLoanForm();
     this.loanError = '';
+    this.loanForm = this.emptyLoanForm();
+    this.loanForm.borrower_id = this.authService.getCurrentUserId();
   }
 
   closeLoanPanel(): void {
@@ -57,7 +60,7 @@ export class InventoryTableComponent {
     this.loanError = '';
 
     if (!this.loanForm.borrower_id || this.loanForm.borrower_id < 1) {
-      this.loanError = 'Please enter a valid Neighbor ID.';
+      this.loanError = 'Unable to determine your Neighbor ID. Please log in again.';
       return;
     }
     if (!this.loanForm.expected_return_date) {
@@ -86,45 +89,6 @@ export class InventoryTableComponent {
         this.loanError = err?.error?.detail ?? 'Could not register the loan. Please try again.';
       },
     });
-  }
-
-  openReturnPanel(itemId: number): void {
-    this.returnPanelItemId = itemId;
-    this.loanPanelItemId = null;
-    this.returnForm = this.emptyReturnForm();
-    this.returnError = '';
-  }
-
-  closeReturnPanel(): void {
-    this.returnPanelItemId = null;
-    this.returnError = '';
-  }
-
-  submitReturn(): void {
-    this.returnError = '';
-
-    if (!this.returnForm.loan_id || this.returnForm.loan_id < 1) {
-      this.returnError = 'Please enter a valid Loan ID.';
-      return;
-    }
-
-    this.returnLoading = true;
-    this.itemService
-      .returnLoan(this.returnForm.loan_id, {
-        actual_return_date: new Date().toISOString(),
-        notes: this.returnForm.notes || undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.returnLoading = false;
-          this.closeReturnPanel();
-          this.inventoryUpdated.emit();
-        },
-        error: (err) => {
-          this.returnLoading = false;
-          this.returnError = err?.error?.detail ?? 'Could not process the return. Please try again.';
-        },
-      });
   }
 
   notifyDeletion(id: number | undefined): void {

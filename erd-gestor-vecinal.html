@@ -146,11 +146,8 @@ erDiagram
     %% RELATIONSHIPS
     %% ─────────────────────────────────────────
 
-    %% A property has one primary owner (neighbor), a neighbor can own one property
-    neighbors ||--o{ properties : "owns / resides at"
-
-    %% A property can house many neighbors (residents), each neighbor lives at one property
-    properties ||--o{ neighbors : "houses"
+    %% A neighbor can own one or more properties, and a property belongs to zero or one owner
+    neighbors ||--o{ properties : "owns"
 
     %% A category classifies many inventory items, an item belongs to exactly one category
     categories ||--o{ neighborhood_items : "classifies"

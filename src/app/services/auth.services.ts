@@ -21,9 +21,25 @@ export class AuthService {
         if (res.access_token && isPlatformBrowser(this.platformId)) {
           localStorage.setItem('token', res.access_token);
           localStorage.setItem('username', res.user);
+          const id = res.user_id ?? res.userId ?? res.id;
+          if (id != null) {
+            localStorage.setItem('user_id', String(id));
+          }
         }
       })
     );
+  }
+
+  getCurrentUserId(): number | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const id = localStorage.getItem('user_id');
+    const parsed = id ? Number(id) : null;
+    return parsed && !Number.isNaN(parsed) ? parsed : null;
+  }
+
+  getCurrentUserName(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    return localStorage.getItem('username');
   }
 
   register(payload: { username: string; password: string; full_name: string; email?: string; phone?: string }) {

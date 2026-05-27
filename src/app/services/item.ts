@@ -65,4 +65,15 @@ export class ItemService {
       })
     );
   }
+
+  /** GET /item-loans/item/{id}/active — get active loans for a specific item */
+  getActiveLoansByItem(itemId: number): Observable<ItemLoan[]> {
+    return this.http.get<ItemLoan[]>(`${this.loansUrl}/item/${itemId}/active`).pipe(
+      catchError(error => {
+        console.error('ItemService.getActiveLoansByItem error:', error);
+        return of([]);
+      })
+    );
+  }
 }
+
